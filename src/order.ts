@@ -8,10 +8,19 @@ export type OrderItem = {
 export const CURRENCIES = ["EUR", "GBP"] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
+/**
+ * EUR per one unit of each currency. A fixed table until we sell in volume (see the
+ * add-order-currency design): it is stamped on each order, so changing it never alters
+ * orders or invoices already created.
+ */
+export const EUR_EXCHANGE_RATES: Record<Currency, number> = { EUR: 1, GBP: 1.17 };
+
 export type Order = {
   id: string;
   customerEmail: string;
   currency: Currency;
+  /** EUR per one unit of `currency`, fixed when the order was created. */
+  eurExchangeRate: number;
   items: OrderItem[];
   /** Minor units of `currency`, VAT included. */
   totalCents: number;
@@ -66,6 +75,7 @@ export function createOrder(input: NewOrder, id: string, now: Date): Order {
     id,
     customerEmail: input.customerEmail,
     currency: input.currency,
+    eurExchangeRate: EUR_EXCHANGE_RATES[input.currency],
     items: input.items,
     totalCents,
     createdAt: now.toISOString(),
