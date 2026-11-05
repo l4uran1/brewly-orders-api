@@ -26,9 +26,30 @@ test("POST /orders creates the order and publishes orders.created", () =>
     assert.deepEqual(publisher.messages, [
       {
         topic: "orders.created",
-        payload: { orderId: "o-1", customerEmail: "ana@example.com", totalCents: 2500, createdAt: "2026-11-05T10:00:00.000Z" },
+        payload: {
+          orderId: "o-1",
+          customerEmail: "ana@example.com",
+          totalCents: 2500,
+          currency: "EUR",
+          eurExchangeRate: 1,
+          createdAt: "2026-11-05T10:00:00.000Z",
+        },
       },
     ]);
+  }));
+
+test("orders.created carries the currency and the exchange rate of a GBP order", () =>
+  withServer(async (url, publisher) => {
+    await post(url, { customerEmail: "ana@example.com", currency: "GBP", items: [{ sku: "X", quantity: 2, unitPriceCents: 1250 }] });
+
+    assert.deepEqual(publisher.messages[0].payload, {
+      orderId: "o-1",
+      customerEmail: "ana@example.com",
+      totalCents: 2500,
+      currency: "GBP",
+      eurExchangeRate: 1.17,
+      createdAt: "2026-11-05T10:00:00.000Z",
+    });
   }));
 
 test("POST /orders rejects an invalid order without publishing", () =>

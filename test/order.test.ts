@@ -35,6 +35,12 @@ test("parseNewOrder rejects a non-integer quantity", () => {
   assert.throws(() => parseNewOrder({ ...valid, items }), /quantity/);
 });
 
+test("createOrder fixes the EUR exchange rate when the order is created", () => {
+  const now = new Date("2026-11-05T10:00:00Z");
+  assert.equal(createOrder({ ...valid, currency: "GBP" }, "o-1", now).eurExchangeRate, 1.17);
+  assert.equal(createOrder({ ...valid, currency: "EUR" }, "o-2", now).eurExchangeRate, 1);
+});
+
 test("createOrder adds up the total in cents", () => {
   const order = createOrder({ ...valid, currency: "EUR" }, "o-1", new Date("2026-11-05T10:00:00Z"));
   assert.equal(order.totalCents, 2 * 1250 + 499);
