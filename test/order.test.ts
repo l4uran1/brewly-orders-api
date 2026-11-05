@@ -36,7 +36,7 @@ test("parseNewOrder rejects a non-integer quantity", () => {
 });
 
 test("createOrder adds up the total in cents", () => {
-  const order = createOrder(valid, "o-1", new Date("2026-11-05T10:00:00Z"));
+  const order = createOrder({ ...valid, currency: "EUR" }, "o-1", new Date("2026-11-05T10:00:00Z"));
   assert.equal(order.totalCents, 2 * 1250 + 499);
   assert.equal(order.createdAt, "2026-11-05T10:00:00.000Z");
 });
