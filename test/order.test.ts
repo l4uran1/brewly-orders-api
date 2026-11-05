@@ -10,8 +10,16 @@ const valid = {
   ],
 };
 
-test("parseNewOrder accepts a valid order", () => {
-  assert.deepEqual(parseNewOrder(valid), valid);
+test("parseNewOrder accepts a valid order, in EUR by default", () => {
+  assert.deepEqual(parseNewOrder(valid), { ...valid, currency: "EUR" });
+});
+
+test("parseNewOrder accepts an order in GBP", () => {
+  assert.equal(parseNewOrder({ ...valid, currency: "GBP" }).currency, "GBP");
+});
+
+test("parseNewOrder rejects a currency we cannot charge in", () => {
+  assert.throws(() => parseNewOrder({ ...valid, currency: "USD" }), /currency/);
 });
 
 test("parseNewOrder rejects an invalid email", () => {

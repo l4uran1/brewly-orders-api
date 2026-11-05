@@ -39,6 +39,14 @@ test("POST /orders rejects an invalid order without publishing", () =>
     assert.equal(publisher.messages.length, 0);
   }));
 
+test("POST /orders rejects an unsupported currency without publishing", () =>
+  withServer(async (url, publisher) => {
+    const res = await post(url, { customerEmail: "ana@example.com", currency: "USD", items: [{ sku: "X", quantity: 1, unitPriceCents: 100 }] });
+
+    assert.equal(res.status, 400);
+    assert.equal(publisher.messages.length, 0);
+  }));
+
 test("GET /orders/:id returns a created order", () =>
   withServer(async (url) => {
     await post(url, { customerEmail: "ana@example.com", items: [{ sku: "X", quantity: 1, unitPriceCents: 100 }] });
