@@ -1,4 +1,4 @@
-import type { Order } from "./order.ts";
+import type { Currency, Order } from "./order.ts";
 
 export const ORDERS_CREATED = "orders.created";
 
@@ -9,7 +9,11 @@ export const ORDERS_CREATED = "orders.created";
 export type OrderCreated = {
   orderId: string;
   customerEmail: string;
+  /** Minor units of `currency`, VAT included. */
   totalCents: number;
+  currency: Currency;
+  /** EUR per one unit of `currency`, fixed at checkout. */
+  eurExchangeRate: number;
   createdAt: string;
 };
 
@@ -18,6 +22,8 @@ export function toOrderCreated(order: Order): OrderCreated {
     orderId: order.id,
     customerEmail: order.customerEmail,
     totalCents: order.totalCents,
+    currency: order.currency,
+    eurExchangeRate: order.eurExchangeRate,
     createdAt: order.createdAt,
   };
 }

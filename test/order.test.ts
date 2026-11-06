@@ -10,8 +10,16 @@ const valid = {
   ],
 };
 
-test("parseNewOrder accepts a valid order", () => {
-  assert.deepEqual(parseNewOrder(valid), valid);
+test("parseNewOrder accepts a valid order, in EUR by default", () => {
+  assert.deepEqual(parseNewOrder(valid), { ...valid, currency: "EUR" });
+});
+
+test("parseNewOrder accepts an order in GBP", () => {
+  assert.equal(parseNewOrder({ ...valid, currency: "GBP" }).currency, "GBP");
+});
+
+test("parseNewOrder rejects a currency we cannot charge in", () => {
+  assert.throws(() => parseNewOrder({ ...valid, currency: "USD" }), /currency/);
 });
 
 test("parseNewOrder rejects an invalid email", () => {
@@ -27,8 +35,14 @@ test("parseNewOrder rejects a non-integer quantity", () => {
   assert.throws(() => parseNewOrder({ ...valid, items }), /quantity/);
 });
 
+test("createOrder fixes the EUR exchange rate when the order is created", () => {
+  const now = new Date("2026-11-05T10:00:00Z");
+  assert.equal(createOrder({ ...valid, currency: "GBP" }, "o-1", now).eurExchangeRate, 1.17);
+  assert.equal(createOrder({ ...valid, currency: "EUR" }, "o-2", now).eurExchangeRate, 1);
+});
+
 test("createOrder adds up the total in cents", () => {
-  const order = createOrder(valid, "o-1", new Date("2026-11-05T10:00:00Z"));
+  const order = createOrder({ ...valid, currency: "EUR" }, "o-1", new Date("2026-11-05T10:00:00Z"));
   assert.equal(order.totalCents, 2 * 1250 + 499);
   assert.equal(order.createdAt, "2026-11-05T10:00:00.000Z");
 });
